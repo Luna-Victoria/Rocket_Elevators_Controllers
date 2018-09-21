@@ -1,0 +1,185 @@
+SEQUENCE OperateControlPanelBasement (DisplayedCharacter)
+  CASE DisplayNumber OF
+    ButtonSS1 IS Push : PRINT "SS1" ON Display
+    ButtonSS2 IS Push : PRINT "SS2" ON Display
+    ButtonSS3 IS Push : PRINT "SS3" ON Display
+    ButtonSS4 IS Push : PRINT "SS4" ON Display
+    ButtonSS5 IS Push : PRINT "SS5" ON Display
+    ButtonSS6 IS Push : PRINT "SS6" ON Display
+  END CASE
+  IF Display PRINT Character ON Display THEN
+    RETURN DisplayedCharacter
+    CALL FindBasementElevator (Battery)
+    CALL RequestElevator (Battery)
+  END IF
+  READ
+END SEQUENCE
+
+SEQUENCE OperateControlPanel2_20 (DisplayedCharacter)
+  CASE DisplayNumber OF
+    Button0 IS Push : PRINT + '0' ON Display
+    Button1 IS Push : PRINT + '1' ON Display
+    Button2 IS Push : PRINT + '2' ON Display
+    Button3 IS Push : PRINT + '3' ON Display
+    Button4 IS Push : PRINT + '4' ON Display
+    Button5 IS Push : PRINT + '5' ON Display
+    Button6 IS Push : PRINT + '6' ON Display
+    Button7 IS Push : PRINT + '7' ON Display
+    Button8 IS Push : PRINT + '8' ON Display
+    Button9 IS Push : PRINT + '9' ON Display
+  END CASE
+  IF Printed Character > 20 AND < 40 THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 20-40 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 40 AND < 61 THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 40-60 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 60 THEN
+    CLEAR Display
+    PRINT "ERROR! SELECT AN OTHER FLOOR" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE RETURN DisplayedCharacter
+  CALL Find2_20Elevator (Battery)
+  CALL RequestElevator (Battery)
+  END IF
+END SEQUENCE
+
+SEQUENCE OperateControlPanel20_40 (DisplayedCharacter)
+  CASE DisplayNumber OF
+    Button0 IS Push : PRINT + '0' ON Display
+    Button1 IS Push : PRINT + '1' ON Display
+    Button2 IS Push : PRINT + '2' ON Display
+    Button3 IS Push : PRINT + '3' ON Display
+    Button4 IS Push : PRINT + '4' ON Display
+    Button5 IS Push : PRINT + '5' ON Display
+    Button6 IS Push : PRINT + '6' ON Display
+    Button7 IS Push : PRINT + '7' ON Display
+    Button8 IS Push : PRINT + '8' ON Display
+    Button9 IS Push : PRINT + '9' ON Display
+  END CASE
+  IF Printed Character < 20 THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 2-20 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 40 AND < 61 THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 40-60 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 60 THEN
+    CLEAR Display
+    PRINT "ERROR! SELECT AN OTHER FLOOR" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE RETURN DisplayedCharacter
+  CALL Find20_40Elevator (Battery)
+  CALL RequestElevator (Battery)
+  END IF
+END SEQUENCE
+
+SEQUENCE OperateControlPanel40_60 (DisplayedCharacter)
+  CASE DisplayNumber OF
+    Button0 IS Push : PRINT + '0' ON Display
+    Button1 IS Push : PRINT + '1' ON Display
+    Button2 IS Push : PRINT + '2' ON Display
+    Button3 IS Push : PRINT + '3' ON Display
+    Button4 IS Push : PRINT + '4' ON Display
+    Button5 IS Push : PRINT + '5' ON Display
+    Button6 IS Push : PRINT + '6' ON Display
+    Button7 IS Push : PRINT + '7' ON Display
+    Button8 IS Push : PRINT + '8' ON Display
+    Button9 IS Push : PRINT + '9' ON Display
+  END CASE
+  IF Printed Character <= 20 THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 2-20 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 20 AND < 40  THEN
+    CLEAR Display
+    PRINT "ERROR! GO TO 20-40 PANEL" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE IF Printed Character > 60 THEN
+    CLEAR Display
+    PRINT "ERROR! SELECT AN OTHER FLOOR" AND INIT Timer 3 Second
+    CLEAR Display
+  ELSE RETURN DisplayedCharacter
+  CALL Find40_60Elevator (Battery)
+  CALL RequestElevator (Battery)
+  END IF
+END SEQUENCE
+
+
+SEQUENCE FindBasementElevator (Battery)
+  FOR EACH Elevator IN BasementColumn
+    IF ElevatorFloor = FirstFloor THEN
+      IF Status IS Stop THEN
+        RETURN Elevator
+      Else IF Status IS Idle THEN
+        RETURN Elevator
+      END IF
+    ELSE IF ElevatorFloor < FirstFloor THEN
+      IF Status IS Move BackToOrigin THEN
+        RETURN Elevator
+      END IF
+    END IF
+  END FOR
+END SEQUENCE
+
+SEQUENCE Find2_20Elevator (Battery, FloorList)
+  FOR EACH Elevator IN 2_20Column
+    IF ElevatorFloor = FirstFloor THEN
+      READ FloorList
+      IF Status IS Stop AND TotalListEntry < 7 THEN
+        RETURN Elevator
+      Else IF Status IS Idle THEN
+        RETURN Elevator
+      END IF
+    ELSE IF ElevatorFloor > FirstFloor THEN
+      IF Status IS Move BackToOrigin THEN
+        RETURN Elevator
+      ELSE IF Status IS Move GoingUp AND TotalListEntry < 7 THEN
+        RETURN Elevator
+      END IF
+    END IF
+  END FOR
+END SEQUENCE
+
+SEQUENCE Find20_40Elevator (Battery, FloorList)
+  FOR EACH Elevator IN 20_40Column
+    IF ElevatorFloor = FirstFloor THEN
+      READ FloorList
+      IF Status IS Stop AND TotalListEntry < 7 THEN
+        RETURN Elevator
+        Else IF Status IS Idle THEN
+            RETURN Elevator
+          END IF
+      ELSE IF ElevatorFloor > FirstFloor THEN
+        IF Status IS Move BackToOrigin THEN
+          RETURN Elevator
+        ELSE IF Status IS Move GoingUp AND TotalListEntry < 7 THEN
+          RETURN Elevator
+          END IF
+        END IF
+      END FOR
+    END SEQUENCE
+
+SEQUENCE Find40_60Elevator (Battery, FloorList)
+      FOR EACH Elevator IN 40_60Column
+        IF ElevatorFloor = FirstFloor THEN
+          READ FloorList
+            IF Status IS Stop AND TotalListEntry < 7 THEN
+              RETURN Elevator
+            Else IF Status IS Idle THEN
+              RETURN Elevator
+            END IF
+        ELSE IF ElevatorFloor > FirstFloor THEN
+          IF Status IS Move BackToOrigin THEN
+            RETURN Elevator
+          ELSE IF Status IS Move GoingUp AND TotalListEntry < 7 THEN
+            RETURN Elevator
+            END IF
+          END IF
+        END FOR
+      END SEQUENCE
+
+S
