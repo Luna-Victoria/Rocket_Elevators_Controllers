@@ -1,7 +1,6 @@
 SEQUENCE CallElevator (ButtonDirection, PresentFloor)
   CALL ActivateButton (ButtonDirection, PresentFloor)
   CALL FindElevator (ButtonDirection, PresentFloor)
-  CALL RequestElevator (Elevator, PresentFloor)
 END SEQUENCE
 
 SEQUENCE ActivateButton (ButtonDirection, PresentFloor)
@@ -57,6 +56,7 @@ SEQUENCE FindElevator (ButtonDirection, PresentFloor)
       END IF
     END FOR
   END WHILE
+  CALL RequestElevator (Elevator, PresentFloor)
 END SEQUENCE
 
 SEQUENCE IsNearestElevator (ElevatorFloor, PresentFloor)
@@ -99,10 +99,10 @@ SEQUENCE OperateElevator (Elevator, FloorList, ButtonDirection)
     CALL OpenDoor (Elevator)
     CALL DeactivateButton
     CALL DeactivateInsideButton
-  ELSE IF ElevatorFloor > RequestedFloor THEN
+  ELSE IF ElevatorFloor > NextFloor THEN
     Elevator.Status IS Move GoingDown
     CALL LevelDown (Elevator)
-  ELSE IF ElevatorFloor < RequestedFloor THEN
+  ELSE IF ElevatorFloor < NextFloor THEN
     Elevator.Status IS Move GoingUp
     CALL CloseDoor (Elevator) AND CALL LevelUp (Elevator)
   END IF
@@ -152,9 +152,13 @@ END SEQUENCE
 
 SEQUENCE RequestFloor(Elevator, PresentFloor)
    IF ElevatorDirection IS GoingUp AND PresentFloor > ElevatorFloor THEN
-       CALL RequestElevator AND CALL ActivateInsideButton
+      RETURN RequestedFloor
+      CALL RequestElevator
+      CALL ActivateInsideButton
    ELSE IF ElevatorDirection IS GoingDown AND Floor < ElevatorFloor THEN
-       CALL RequestElevator AND CALL ActivateInsideButton
+      RETURN RequestedFloor
+      CALL RequestElevator
+      CALL ActivateInsideButton
    END IF
 END SEQUENCE
 
